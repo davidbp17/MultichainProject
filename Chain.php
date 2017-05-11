@@ -21,7 +21,8 @@ class Chain{
                 .$params
                 .'] }\' -H "content-type:text/plain;" http://'.$this->ipaddress.':'.$this->rpcport.'/';
 
-        $ret=system($cmd);
+        $ret=exec($cmd);
+        //$ret = system($cmd);
         return json_decode($ret, true);  
     }
     
@@ -30,8 +31,8 @@ class Chain{
     }
     
     function createUser($name){
-        
-        $params = '"stream", "'.$name.'", false';
+        $hname = bin2hex($name);
+        $params = '"stream", "'.$hname.'", false';
         return $this->connectToChain('create', $params);
     }
     
@@ -40,24 +41,34 @@ class Chain{
         $ret = array();
         $results = $array["result"];
         foreach ($results as $value) {
-            array_push($ret, $value["name"]);
+            array_push($ret, hex2bin($value["name"]));
         }
         return $ret;
     }
     
     function rateUser($toBeRated, $ratedBy, $payload){
+        $htoBeRated = bin2hex($toBeRated);
         $hRatedBy = bin2hex($ratedBy);
         $hPayload = bin2hex($payload);
-        $params = '"'.$toBeRated.'", "'.$hRatedBy.'", "'.$hPayload.'"';
+        $params = '"'.$htoBeRated.'", "'.$hRatedBy.'", "'.$hPayload.'"';
         return $this->connectToChain('publish', $params);
     }
     
-    function checkRating(){
-        
+    function checkRating($userName){
+        $huserName = bin2hex($userName);
+        $this->connectToChain('subscribe', '"'.$huserName.'"');
+        $array = $this->connectToChain('liststreamitems', '"'.$huserName.'"');
+        $ret = array();
+        $results = $array["result"];
+        foreach ($results as $value) {
+            array_push($ret, array(hex2bin($value["key"]), hex2bin($value["data"])));
+        }
+        return $ret;
     }
 }
 
-$chain = new Chain(multichainrpc, DFzHtvtTzJaPwCaWzTE1eG2KqQzEWwiQH9rxrFTTyPAQ, localhost, 5000);
-$array = $chain->rateUser('bryan5', 'bob', '5,I like this store');
+//$chain = new Chain(multichainrpc, DFzHtvtTzJaPwCaWzTE1eG2KqQzEWwiQH9rxrFTTyPAQ, localhost, 5000);
+//$array = $chain->checkRating('bryan6');
+//print_r($array);
 ?>
 
