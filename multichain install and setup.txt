@@ -1,0 +1,45 @@
+Installing MultiChain – Linux 
+Source: http://www.multichain.com/download-install/
+
+	su (enter root password)
+
+	cd /tmp
+	wget http://www.multichain.com/download/multichain-1.0-beta-1.tar.gz
+	tar -xvzf multichain-1.0-beta-1.tar.gz
+	cd multichain-1.0-beta-1
+	mv multichaind multichain-cli multichain-util /usr/local/bin (to make easily accessible on the command line)
+
+	exit (to return to your regular user)
+
+Setup Blockchain:
+Based on: https://samsclass.info/141/proj/pMult2.htm
+
+	multichain-util create [chain_name]
+
+	nano ~/.multichain/[chain_name]/params.dat
+
+	change:
+		anyone-can-connect = true
+		anyone-can-send = true
+		
+		allow-p2sh-outputs = false
+		allow-multisig-outputs = false
+		
+		setup-first-blocks = 10000
+		
+Start Blockchain:
+	multichaind [chain_name] -daemon -rpcport=xxxx
+	(replace xxxx with a port of your choice.  We use 5000.)
+
+Note: run the Start Blockchain command each time the server starts.
+	
+Continue setup:
+
+	multichain-cli [chain_name] getnewaddress
+		(It will return a hex string [hex_string].)
+	
+	multichain-cli [chain_name] grant [hex_string] receive,send
+
+
+Finding username and password:
+ cat ~/.multichain/[chain_name]/multichain.conf
